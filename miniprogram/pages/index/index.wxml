@@ -1,0 +1,6 @@
+<!-- 简报 H5 地址：部署到哪里就填哪里。
+     推荐填 GitHub Pages 稳定地址，例如：
+     https://YOUR-GITHUB-USERNAME.github.io/ai-hot-briefing/
+     当前 CloudStudio 临时地址（每天会变）也可先用：
+     https://7750463e48f24d029f48e76a89570b9e.app.codebuddy.work -->
+<web-view src="{{url}}"></web-view>
