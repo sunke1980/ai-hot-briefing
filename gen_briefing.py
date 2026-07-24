@@ -1,8 +1,9 @@
 import json, urllib.request, datetime, html, os, base64
 
 # ===================== 可配置项（按需修改） =====================
-WX_APPID = "wx5c8b025da0fed73c"  # 小程序 AppID（用户提供）。注：H5 网页用 JS-SDK 分享朋友圈需【公众号】AppID；
-                                  # 用此小程序分享请走小程序 onShareTimeline 路径（见 miniprogram/ 脚手架）。
+WX_APPID = "wx21780df9676cf9f7" # 公众号【开发者ID(AppID)】（用户提供，wx 开头，JS-SDK 用）。注意：JS-SDK 实际生效
+                                  # 还需后端用 AppSecret 计算 signature 注入 wx.config；且分享域名须已在公众号后台
+                                  # 「JS接口安全域名」中备案（raw github.io 不满足）。缺这两样则网页可看、可手动「…」分享。
 SHARE_IMG_URL = ""              # 分享缩略图绝对地址(HTTPS)，留空则用内置 logo 兜底
 SHARE_TITLE = "AI HOT 每日简报"
 SHARE_DESC = "每天 AI 圈最值得看的大事，按五大版块精排"
