@@ -9,6 +9,14 @@ SHARE_TITLE = "AI HOT 每日简报"
 SHARE_DESC = "每天 AI 圈最值得看的大事，按五大版块精排"
 # ==============================================================
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+POP = {}
+try:
+    with open(os.path.join(SCRIPT_DIR, "pop.json"), encoding="utf-8") as _f:
+        POP = json.load(_f)
+except FileNotFoundError:
+    POP = {}
+
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 BASE = "https://aihot.virxact.com/api/public/items"
 
@@ -27,6 +35,15 @@ raw_count = data.get("count", len(items))
 items.sort(key=lambda x: (x.get("score") or 0), reverse=True)
 items = items[:10]
 total = len(items)
+
+# 写出原始条目（含 id/title/summary 等），供"科普重写"步骤读取
+_items_dump = [{"id": it.get("id"), "title": it.get("title"), "url": it.get("url"),
+                "source": it.get("source"), "publishedAt": it.get("publishedAt"),
+                "category": it.get("category"), "summary": it.get("summary"), "score": it.get("score")}
+               for it in items]
+with open(os.path.join(SCRIPT_DIR, "items.json"), "w", encoding="utf-8") as _f:
+    json.dump({"items": _items_dump, "raw_count": raw_count,
+               "since": since, "now_utc": now.isoformat()}, _f, ensure_ascii=False, indent=2)
 
 CATEGORY_META = {
     "ai-models":  ("模型发布 / 更新", "#6366f1"),
@@ -86,12 +103,17 @@ for cat in ORDER:
         link = html.escape(it.get("url") or "#")
         source = html.escape(it.get("source") or "")
         summary = html.escape(it.get("summary") or "")
+        pop_text = POP.get(str(it.get("id"))) or POP.get(it.get("id"))
+        pop_html = ""
+        if pop_text:
+            pop_html = f'<p class="pop"><span class="pop-tag">科普解读</span>{html.escape(pop_text)}</p>'
         tstr = human_time(it.get("publishedAt"))
         cards_html += f'''    <article class="card" style="--c:{color}">
       <span class="num">{gidx}</span>
       <a class="card-title" href="{link}" target="_blank" rel="noopener">{title}</a>
       <div class="meta"><span class="src">{source}</span><span class="time">{tstr}</span></div>
       <p class="summary">{summary}</p>
+      {pop_html}
     </article>
 '''
     cards_html += '  </div>\n</section>\n'
@@ -134,7 +156,7 @@ wx.ready(function(){
     body { background:linear-gradient(160deg,#eef2ff 0%,#faf5ff 55%,#eef2ff 100%); color:#1e293b; }
     .card { background:#ffffff; box-shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(99,102,241,.06); }
     .card-title { color:#1e293b; } .card-title:hover { color:var(--indigo); }
-    .summary { color:#475569; } .src,.time,.subtitle { color:#64748b; } header h1 { color:#1e293b; }
+    .summary { color:#475569; } .pop { color:#475569; } .src,.time,.subtitle { color:#64748b; } header h1 { color:#1e293b; }
   }
   .wrap { max-width:960px; margin:0 auto; }
   header { text-align:center; margin-bottom:32px; }
@@ -155,6 +177,8 @@ wx.ready(function(){
   .meta { display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; gap:8px; }
   .src { color:#94a3b8; } .time { color:#94a3b8; white-space:nowrap; }
   .summary { font-size:13px; color:#cbd5e1; }
+  .pop { font-size:13px; color:#cbd5e1; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(148,163,184,.28); }
+  .pop-tag { display:inline-block; font-size:11px; font-weight:700; color:#fff; background:#6366f1; padding:1px 7px; border-radius:10px; margin-right:6px; vertical-align:middle; }
   footer { text-align:center; font-size:12px; opacity:.7; margin-top:40px; }
 </style>
 </head>
